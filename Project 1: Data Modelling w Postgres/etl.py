@@ -25,6 +25,7 @@ def process_log_file(cur, filepath):
 
     # filter by NextSong action
     df = df[df['page']=='NextSong']
+    df['ts']=pd.to_datetime(df['ts'], unit='ms')
 
     # convert timestamp column to datetime
     t = pd.to_datetime(df['ts'], unit='ms')
