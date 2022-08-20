@@ -6,6 +6,12 @@ from sql_queries import *
 
 
 def process_song_file(cur, filepath):
+    """ This function reads JSON file containing song data and inserts the corresponding data into the song table and artist table
+    Args:
+    cur: Postgres database cursor
+    filepath: location of JSON song file
+    Return: None
+    """
     # open song file
     df = pd.read_json(filepath, lines=True)
 
@@ -20,6 +26,12 @@ def process_song_file(cur, filepath):
 
 
 def process_log_file(cur, filepath):
+    """ This function reads a JSON file containing the log data of people listening to songs. Transforms the time data (ts) in log file from milliseconds to time stamp. and inserts the corresponding data into the time table, user table and songplay table
+    Args:
+    cur: Postgres Database cursor
+    filepath: location of JSON log file
+    Returns: None
+    """
     # open log file
     df = pd.read_json(filepath, lines=True)
 
@@ -29,6 +41,7 @@ def process_log_file(cur, filepath):
 
     # convert timestamp column to datetime
     t = pd.to_datetime(df['ts'], unit='ms')
+    
     
     # insert time data records
     time_data = list((t,t.dt.hour, t.dt.day, t.dt.weekofyear, t.dt.month, t.dt.year, t.dt.weekday))
@@ -59,12 +72,20 @@ def process_log_file(cur, filepath):
             songid, artistid = None, None
 
         # insert songplay record
-        songplay_data = (index, row.ts, row.userId, row.level, songid, artistid, row.sessionId, row.location, row.userAgent )
+        songplay_data = (row.ts, row.userId, row.level, songid, artistid, row.sessionId, row.location, row.userAgent )
     
         cur.execute(songplay_table_insert, songplay_data)
 
 
 def process_data(cur, conn, filepath, func):
+    """ This function is used to get all the JSON files in a directory.
+    Args:
+    cur: Postgres database cursor.
+    conn: database connection details.
+    filepath: location of JSON files.
+    func: functions for reading and processing the Log and Song JSON
+    Returns: None
+    """
     # get all files matching extension from directory
     all_files = []
     for root, dirs, files in os.walk(filepath):
